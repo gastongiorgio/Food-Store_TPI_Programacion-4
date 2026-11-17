@@ -31,7 +31,7 @@ class UsuarioService:
             usuario.disabled = disabled
             return UserPublic.model_validate(usuario)
 
-    
+
     def listar_usuarios(self) -> list[UserPublic]:
         with self.uow as uow:
             usuarios = uow.usuarios.list_all()
