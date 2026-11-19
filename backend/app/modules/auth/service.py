@@ -6,7 +6,6 @@ from app.modules.usuarios.schemas import UserCreate, UserPublic
 from app.modules.usuarios.unit_of_work import UsuarioUnitOfWork
 
 
-
 class AuthService:
     def __init__(self, uow: UsuarioUnitOfWork) -> None:
         self.uow = uow
