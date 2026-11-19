@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class Producto(SQLModel, table=True):
-    __tablename__ = "producto"
+    __tablename__ = "producto"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
     categoria_id: int = Field(foreign_key="categoria.id")
