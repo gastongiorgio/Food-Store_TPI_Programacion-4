@@ -13,4 +13,16 @@ def session_factory() -> Session:
 
 
 def create_all_tables() -> None:
+    from importlib import import_module
+
+    modelos = (
+        "app.modules.usuarios.models",
+        "app.modules.categorias.models",
+        "app.modules.productos.models",
+        "app.modules.pedidos.models",
+    )
+
+    for modulo in modelos:
+        import_module(modulo)
+
     SQLModel.metadata.create_all(engine)
