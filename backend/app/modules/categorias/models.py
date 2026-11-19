@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class Categoria(SQLModel, table=True):
-    __tablename__ = "categoria"
+    __tablename__ = "categoria"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
     nombre: str = Field(unique=True, index=True)

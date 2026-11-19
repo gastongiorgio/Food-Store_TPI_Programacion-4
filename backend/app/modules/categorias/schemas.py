@@ -8,20 +8,31 @@ class CategoriaBase(SQLModel):
 
     @field_validator("nombre", mode="before")
     @classmethod
-    def validar_nombre(cls, nombre: str | None) -> str:
-        if nombre is None:
-            raise ValueError("El nombre no puede ser nulo.")
+    def validar_nombre(cls, nombre: object) -> object:
+        if isinstance(nombre, str):
+            return nombre.strip()
 
-        return nombre.strip()
+        return nombre
 
 
 class CategoriaCreate(CategoriaBase):
     pass
 
 
-class CategoriaUpdate(CategoriaBase):
+class CategoriaUpdate(SQLModel):
     nombre: str | None = Field(default=None, min_length=2, max_length=100)
     descripcion: str | None = None
+
+    @field_validator("nombre", mode="before")
+    @classmethod
+    def validar_nombre(cls, nombre: object) -> object:
+        if nombre is None:
+            raise ValueError("El nombre no puede ser nulo.")
+
+        if isinstance(nombre, str):
+            return nombre.strip()
+
+        return nombre
 
 
 class CategoriaRead(CategoriaBase):
