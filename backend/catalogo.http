@@ -1,0 +1,201 @@
+@baseUrl = http://127.0.0.1:8000/api/v1
+
+############################################################
+# AUTENTICACION - ADMINISTRADOR
+############################################################
+
+### Login como administrador: 200
+# @name loginAdmin
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### Consultar usuario autenticado: 200
+GET {{baseUrl}}/auth/me
+
+### Listar usuarios (solo admin): 200
+GET {{baseUrl}}/admin/usuarios
+
+
+############################################################
+# CATEGORIAS
+############################################################
+
+### Listar categorias activas: 200
+GET {{baseUrl}}/categorias
+
+### Obtener categoria del seed: 200
+GET {{baseUrl}}/categorias/1
+
+### Crear categoria de prueba: 201
+# @name categoriaNueva
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+    "nombre": "Categoria Prueba TPI",
+    "descripcion": "Creada desde REST Client"
+}
+
+### Crear categoria con nombre duplicado: 409
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+    "nombre": "CATEGORIA PRUEBA TPI",
+    "descripcion": "No debe permitirse"
+}
+
+### Obtener la categoria creada: 200
+GET {{baseUrl}}/categorias/{{categoriaNueva.response.body.$.id}}
+
+### Actualizar solamente la descripcion: 200
+PUT {{baseUrl}}/categorias/{{categoriaNueva.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "descripcion": "Categoria actualizada parcialmente"
+}
+
+### Crear categoria con nombre demasiado corto: 422
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+    "nombre": "A",
+    "descripcion": "Nombre invalido"
+}
+
+### Obtener categoria inexistente: 404
+GET {{baseUrl}}/categorias/-1
+
+
+############################################################
+# PRODUCTOS
+############################################################
+
+### Listar productos paginados: 200
+GET {{baseUrl}}/productos?skip=0&limit=20
+
+### Buscar productos por nombre: 200
+GET {{baseUrl}}/productos?search=hamburguesa
+
+### Filtrar por categoria del seed: 200
+GET {{baseUrl}}/productos?categoria_id=1
+
+### Filtrar por disponibilidad: 200
+GET {{baseUrl}}/productos?disponible=true
+
+### Obtener producto del seed: 200
+GET {{baseUrl}}/productos/1
+
+### Crear producto de prueba: 201
+# @name productoNuevo
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+    "nombre": "Producto Prueba TPI",
+    "descripcion": "Producto creado desde REST Client",
+    "precio_base": 4500,
+    "imagen_url": null,
+    "stock": 10,
+    "disponible": true,
+    "categoria_id": {{categoriaNueva.response.body.$.id}}
+}
+
+### Obtener producto creado con su categoria: 200
+GET {{baseUrl}}/productos/{{productoNuevo.response.body.$.id}}
+
+### Buscar y filtrar productos: 200
+GET {{baseUrl}}/productos?search=prueba&categoria_id={{categoriaNueva.response.body.$.id}}&disponible=true&skip=0&limit=20
+
+### Actualizar parcialmente el producto: 200
+PUT {{baseUrl}}/productos/{{productoNuevo.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Producto TPI Actualizado",
+    "precio_base": 5000
+}
+
+### Actualizar stock y disponibilidad: 200
+PATCH {{baseUrl}}/productos/{{productoNuevo.response.body.$.id}}/stock
+Content-Type: application/json
+
+{
+    "stock": 5,
+    "disponible": false
+}
+
+### Comprobar cambios del producto: 200
+GET {{baseUrl}}/productos/{{productoNuevo.response.body.$.id}}
+
+### Crear producto con precio negativo: 422
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+    "nombre": "Producto con precio invalido",
+    "precio_base": -100,
+    "stock": 10,
+    "categoria_id": 1
+}
+
+### Crear producto con stock negativo: 422
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+    "nombre": "Producto con stock invalido",
+    "precio_base": 1000,
+    "stock": -5,
+    "categoria_id": 1
+}
+
+### Crear producto con categoria inexistente: 404
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+    "nombre": "Producto sin categoria",
+    "precio_base": 1000,
+    "stock": 10,
+    "categoria_id": -1
+}
+
+### Obtener producto inexistente: 404
+GET {{baseUrl}}/productos/-1
+
+### Paginacion con limite superior al permitido: 422
+GET {{baseUrl}}/productos?skip=0&limit=101
+
+
+############################################################
+# BAJA LOGICA
+# Ejecutar estas solicitudes al terminar las pruebas.
+############################################################
+
+### Eliminar logicamente el producto: 204
+DELETE {{baseUrl}}/productos/{{productoNuevo.response.body.$.id}}
+
+### Comprobar producto dado de baja: 404
+GET {{baseUrl}}/productos/{{productoNuevo.response.body.$.id}}
+
+### Eliminar logicamente la categoria: 204
+DELETE {{baseUrl}}/categorias/{{categoriaNueva.response.body.$.id}}
+
+### Comprobar categoria dada de baja: 404
+GET {{baseUrl}}/categorias/{{categoriaNueva.response.body.$.id}}
+
+
+############################################################
+# CIERRE DE SESION
+############################################################
+
+### Logout: 200
+POST {{baseUrl}}/auth/logout
+
+### Consultar perfil sin sesion: 401
+GET {{baseUrl}}/auth/me

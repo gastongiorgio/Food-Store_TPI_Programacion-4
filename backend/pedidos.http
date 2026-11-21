@@ -1,0 +1,530 @@
+@baseUrl = http://127.0.0.1:8000/api/v1
+
+############################################################
+# 1. AUTENTICACION Y REGISTRO
+############################################################
+
+### Consultar pedidos sin iniciar sesion: 401
+GET {{baseUrl}}/pedidos
+
+
+### Registrar cliente A: 201
+# @name clienteA
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "cliente_tpi_a",
+    "full_name": "Cliente de Prueba A",
+    "email": "cliente.a@foodstore.test",
+    "password": "Cliente1234!"
+}
+
+
+### Registrar cliente B: 201
+# @name clienteB
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "cliente_tpi_b",
+    "full_name": "Cliente de Prueba B",
+    "email": "cliente.b@foodstore.test",
+    "password": "Cliente1234!"
+}
+
+
+### Registrar usuario duplicado: 409
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "cliente_tpi_a",
+    "full_name": "Cliente Duplicado",
+    "email": "otro@foodstore.test",
+    "password": "Cliente1234!"
+}
+
+
+### Registrar usuario con password corto: 422
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "cliente_invalido",
+    "full_name": "Cliente Invalido",
+    "email": "invalido@foodstore.test",
+    "password": "123"
+}
+
+
+############################################################
+# 2. INICIAR SESION COMO CLIENTE A
+############################################################
+
+### Login cliente A: 200
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=cliente_tpi_a&password=Cliente1234!
+
+
+### Consultar perfil: 200
+GET {{baseUrl}}/auth/me
+
+
+### Listar pedidos propios (inicialmente vacio): 200
+GET {{baseUrl}}/pedidos
+
+
+### Cliente sin permiso para ver resumen: 403
+GET {{baseUrl}}/pedidos/resumen
+
+
+### Cliente sin permiso para gestionar usuarios: 403
+GET {{baseUrl}}/admin/usuarios
+
+
+############################################################
+# 3. CREAR PEDIDO VALIDO - RN-01
+############################################################
+
+### Consultar stock inicial del producto 1: 200
+GET {{baseUrl}}/productos/1
+
+
+### Consultar stock inicial del producto 2: 200
+GET {{baseUrl}}/productos/2
+
+
+### Crear pedido valido con dos productos: 201
+# @name pedidoA
+# Con los precios iniciales del seed:
+# Producto 1: 9000 x 1 = 9000
+# Producto 2: 10500 x 2 = 21000
+# Total esperado: 30000
+
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 1
+        },
+        {
+            "producto_id": 2,
+            "cantidad": 2
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza",
+    "notas": "Sin aderezos"
+}
+
+
+### Obtener pedido creado con sus detalles: 200
+GET {{baseUrl}}/pedidos/{{pedidoA.response.body.$.id}}
+
+
+### Listar pedidos del cliente A: 200
+GET {{baseUrl}}/pedidos?skip=0&limit=20
+
+
+### Filtrar pedidos pendientes: 200
+GET {{baseUrl}}/pedidos?estado=PENDIENTE
+
+
+### Comprobar descuento de stock producto 1: 200
+GET {{baseUrl}}/productos/1
+
+
+### Comprobar descuento de stock producto 2: 200
+GET {{baseUrl}}/productos/2
+
+
+############################################################
+# 4. VALIDACIONES DE CREACION
+############################################################
+
+### Pedido sin items: 422
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+### Cantidad menor que 1: 422
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 0
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+### Forma de pago invalida: 422
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "TARJETA",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+### Direccion demasiado corta: 422
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "TRANSFERENCIA",
+    "direccion_entrega": "ABC"
+}
+
+
+### Producto repetido: 400
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 1
+        },
+        {
+            "producto_id": 1,
+            "cantidad": 2
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+### Producto inexistente: 404
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": -1,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+### Stock insuficiente: 400
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 999999
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+############################################################
+# 5. ROLLBACK DEL UNIT OF WORK - RN-01
+############################################################
+
+### Contar pedidos antes del rollback: 200
+GET {{baseUrl}}/pedidos
+
+
+### Consultar stock antes del rollback: 200
+GET {{baseUrl}}/productos/1
+
+
+### Producto valido seguido de producto inexistente: 404
+# La primera linea descuenta stock.
+# La segunda falla.
+# El Unit of Work debe revertir toda la transaccion.
+
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 1
+        },
+        {
+            "producto_id": -1,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "San Martin 1234, Mendoza"
+}
+
+
+### Comprobar que no se guardo otro pedido: 200
+GET {{baseUrl}}/pedidos
+
+
+### Comprobar que el stock no cambio: 200
+GET {{baseUrl}}/productos/1
+
+
+############################################################
+# 6. CANCELACION DEL CLIENTE A - RN-03 Y RN-04
+############################################################
+
+### Cancelar pedido propio pendiente: 200
+PATCH {{baseUrl}}/pedidos/{{pedidoA.response.body.$.id}}/cancelar
+
+
+### Comprobar estado CANCELADO: 200
+GET {{baseUrl}}/pedidos/{{pedidoA.response.body.$.id}}
+
+
+### Comprobar restitucion de stock producto 1: 200
+GET {{baseUrl}}/productos/1
+
+
+### Comprobar restitucion de stock producto 2: 200
+GET {{baseUrl}}/productos/2
+
+
+### Intentar cancelar nuevamente: 400
+PATCH {{baseUrl}}/pedidos/{{pedidoA.response.body.$.id}}/cancelar
+
+
+############################################################
+# 7. INICIAR SESION COMO CLIENTE B
+############################################################
+
+### Login cliente B: 200
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=cliente_tpi_b&password=Cliente1234!
+
+
+### Listar pedidos propios (debe estar vacio): 200
+GET {{baseUrl}}/pedidos
+
+
+### Intentar consultar pedido ajeno: 403
+GET {{baseUrl}}/pedidos/{{pedidoA.response.body.$.id}}
+
+
+### Intentar cancelar pedido ajeno: 403
+PATCH {{baseUrl}}/pedidos/{{pedidoA.response.body.$.id}}/cancelar
+
+
+### Crear pedido del cliente B: 201
+# @name pedidoB
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 3,
+            "cantidad": 2
+        }
+    ],
+    "forma_pago": "TRANSFERENCIA",
+    "direccion_entrega": "Belgrano 456, Mendoza",
+    "notas": null
+}
+
+
+### Crear segundo pedido del cliente B: 201
+# @name pedidoB2
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 4,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "Belgrano 456, Mendoza"
+}
+
+
+### Cliente intenta cambiar estado como admin: 403
+PATCH {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "EN_PREPARACION"
+}
+
+
+############################################################
+# 8. INICIAR SESION COMO ADMINISTRADOR
+############################################################
+
+### Login administrador: 200
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+
+### Listar todos los pedidos: 200
+GET {{baseUrl}}/pedidos?skip=0&limit=20
+
+
+### Consultar resumen administrativo: 200
+GET {{baseUrl}}/pedidos/resumen
+
+
+### Obtener pedido del cliente B: 200
+GET {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}
+
+
+### Transicion directa invalida de PENDIENTE a ENTREGADO: 400
+PATCH {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "ENTREGADO"
+}
+
+
+### Estado inexistente: 422
+PATCH {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "EN_CAMINO"
+}
+
+
+### Pasar pedido B a EN_PREPARACION: 200
+PATCH {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "EN_PREPARACION"
+}
+
+
+### Pasar pedido B a ENTREGADO: 200
+PATCH {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "ENTREGADO"
+}
+
+
+### Intentar cambiar un pedido entregado: 400
+PATCH {{baseUrl}}/pedidos/{{pedidoB.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "CANCELADO"
+}
+
+
+### Pasar segundo pedido B a EN_PREPARACION: 200
+PATCH {{baseUrl}}/pedidos/{{pedidoB2.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "EN_PREPARACION"
+}
+
+
+############################################################
+# 9. CLIENTE NO PUEDE CANCELAR EN_PREPARACION
+############################################################
+
+### Login cliente B: 200
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=cliente_tpi_b&password=Cliente1234!
+
+
+### Intentar cancelar pedido en preparacion: 400
+PATCH {{baseUrl}}/pedidos/{{pedidoB2.response.body.$.id}}/cancelar
+
+
+############################################################
+# 10. ADMIN CANCELA UN PEDIDO EN PREPARACION
+############################################################
+
+### Consultar stock antes de cancelar: 200
+GET {{baseUrl}}/productos/4
+
+
+### Login administrador: 200
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+
+### Cancelar segundo pedido B desde EN_PREPARACION: 200
+PATCH {{baseUrl}}/pedidos/{{pedidoB2.response.body.$.id}}/estado
+Content-Type: application/json
+
+{
+    "estado": "CANCELADO"
+}
+
+
+### Comprobar restitucion de stock producto 4: 200
+GET {{baseUrl}}/productos/4
+
+
+### Consultar resumen final: 200
+GET {{baseUrl}}/pedidos/resumen
+
+
+############################################################
+# 11. CIERRE DE SESION
+############################################################
+
+### Logout: 200
+POST {{baseUrl}}/auth/logout
+
+
+### Consultar pedidos sin sesion: 401
+GET {{baseUrl}}/pedidos
