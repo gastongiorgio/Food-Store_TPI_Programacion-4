@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class Pedido(SQLModel, table=True):
-    __tablename__ = "pedido"
+    __tablename__ = "pedido"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
     usuario_id: int = Field(foreign_key="usuario.id")
@@ -32,7 +32,7 @@ class Pedido(SQLModel, table=True):
 
 
 class DetallePedido(SQLModel, table=True):
-    __tablename__ = "detalle_pedido"
+    __tablename__ = "detalle_pedido"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
     pedido_id: int = Field(foreign_key="pedido.id")
