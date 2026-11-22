@@ -4,17 +4,14 @@ import type {
     User,
     RegisterData,
     LoginCredentials,
-    AuthMessage,
+    AuthMessage
 } from "../types/auth"
 
 
 export async function register(
     data: RegisterData
 ): Promise<User> {
-    const response = await axiosInstance.post<User>(
-        "/auth/register",
-        data
-    )
+    const response = await axiosInstance.post<User>("/auth/register", data)
 
     return response.data
 }
@@ -32,9 +29,7 @@ export async function login(
         "/auth/token",
         formData,
         {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
+            headers: {"Content-Type": "application/x-www-form-urlencoded"}
         }
     )
 
