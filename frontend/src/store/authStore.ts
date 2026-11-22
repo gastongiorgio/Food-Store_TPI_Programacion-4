@@ -13,6 +13,7 @@ import type {
 } from "../features/auth/types/auth"
 
 import { queryClient } from "../shared/api/queryClient"
+import { setInvalidSessionHandler } from "../shared/api/axiosInstance"
 
 
 interface AuthState {
@@ -82,3 +83,13 @@ export const useAuthStore = create<AuthState>()(
         }
     )
 )
+
+
+setInvalidSessionHandler(() => {
+    queryClient.clear()
+
+    useAuthStore.setState({
+        usuario: null,
+        cargando: false
+    })
+})
