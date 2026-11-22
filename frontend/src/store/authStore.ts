@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthState>()(
 
                     set({ usuario })
                 } catch {
-                    queryClient.clear()
+                    // No tener sesión no debe afectar las consultas públicas.
                     set({ usuario: null })
                 } finally {
                     set({ cargando: false })
