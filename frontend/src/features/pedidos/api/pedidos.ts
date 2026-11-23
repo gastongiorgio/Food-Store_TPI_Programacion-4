@@ -4,7 +4,8 @@ import type {
     Pedido,
     PedidoCreate,
     PedidosPaginados,
-    ResumenPedidos
+    ResumenPedidos,
+    EstadoPedido
 } from "../types/pedidos"
 
 
@@ -22,13 +23,27 @@ export async function crearPedido(
 
 export async function getPedidos(
     skip = 0,
-    limit = 20
+    limit = 20,
+    estado?: EstadoPedido
 ): Promise<PedidosPaginados> {
     const response = await axiosInstance.get<PedidosPaginados>(
         "/pedidos",
         {
-            params: { skip, limit }
+            params: { skip, limit, estado }
         }
+    )
+
+    return response.data
+}
+
+
+export async function cambiarEstadoPedido(
+    pedidoId: number,
+    estado: EstadoPedido
+): Promise<Pedido> {
+    const response = await axiosInstance.patch<Pedido>(
+        `/pedidos/${pedidoId}/estado`,
+        { estado }
     )
 
     return response.data
