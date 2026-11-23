@@ -52,9 +52,6 @@ function CatalogoPage() {
                 </p>
             </div>
 
-
-            {/* BÚSQUEDA Y FILTROS */}
-
             <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -81,7 +78,6 @@ function CatalogoPage() {
                         />
                         
                     </div>
-
 
                     <div>
 
@@ -127,7 +123,6 @@ function CatalogoPage() {
 
                 </div>
 
-
                 {categorias.isError && (
                     <p role="alert" className="mt-3 text-sm text-red-600">
                         No se pudieron cargar las categorías.
@@ -143,9 +138,6 @@ function CatalogoPage() {
                 )}
 
             </div>
-
-
-            {/* ESTADO DE CARGA */}
 
             {isPending ? (
 
@@ -173,8 +165,6 @@ function CatalogoPage() {
 
             ) : isError ? (
 
-                /* ERROR AL CONSULTAR PRODUCTOS */
-
                 <div
                     role="alert"
                     className="rounded-2xl border border-red-200 bg-white px-6 py-10 text-center"
@@ -197,8 +187,6 @@ function CatalogoPage() {
                 </div>
 
             ) : data.items.length === 0 ? (
-
-                /* NO SE ENCONTRARON PRODUCTOS */
 
                 <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center">
 
@@ -226,8 +214,6 @@ function CatalogoPage() {
 
             ) : (
 
-                /* PRODUCTOS Y PAGINACIÓN */
-
                 <>
                     <p
                         className="mb-5 text-sm text-slate-600"
@@ -248,7 +234,6 @@ function CatalogoPage() {
                         ))}
 
                     </div>
-
 
                     {totalPages > 1 && (
                         <nav
