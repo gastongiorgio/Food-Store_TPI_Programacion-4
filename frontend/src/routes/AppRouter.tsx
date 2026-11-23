@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes } from "react-router-dom"
 
 import LoginPage from "../features/auth/pages/LoginPage"
 import RegisterPage from "../features/auth/pages/RegisterPage"
@@ -12,16 +12,18 @@ import MisPedidosPage from "../features/pedidos/pages/MisPedidosPage"
 import AdminResumenPage from "../features/pedidos/pages/AdminResumenPage"
 
 import MainLayout from "../shared/layout/MainLayout"
+import AdminLayout from "../shared/layout/AdminLayout"
 import ProtectedRoute from "./ProtectedRoute"
 
 
 function AppRouter() {
     return (
-        <MainLayout>
-            <Routes>
+        <Routes>
+
+            {/* VISTA DE LA TIENDA */}
+            <Route element={<MainLayout />}>
 
                 {/* RUTAS PÚBLICAS */}
-
                 <Route
                     path="/login"
                     element={<LoginPage />}
@@ -49,7 +51,6 @@ function AppRouter() {
 
 
                 {/* RUTAS CON SESIÓN */}
-
                 <Route element={<ProtectedRoute />}>
 
                     <Route
@@ -64,20 +65,38 @@ function AppRouter() {
 
                 </Route>
 
+            </Route>
 
-                {/* RUTAS DE ADMINISTRACIÓN */}
+            {/* VISTA ADMINISTRATIVA */}
+            <Route
+                element={<ProtectedRoute roles={["admin"]} />}
+            >
 
-                <Route element={<ProtectedRoute roles={["admin"]} />}>
+                <Route
+                    path="/admin"
+                    element={<AdminLayout />}
+                >
 
                     <Route
-                        path="/admin/resumen"
+                        index
+                        element={
+                            <Navigate
+                                to="resumen"
+                                replace
+                            />
+                        }
+                    />
+
+                    <Route
+                        path="resumen"
                         element={<AdminResumenPage />}
                     />
 
                 </Route>
 
-            </Routes>
-        </MainLayout>
+            </Route>
+
+        </Routes>
     )
 }
 

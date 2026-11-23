@@ -36,7 +36,7 @@ function Navbar() {
     return (
         <header className="border-b border-slate-700 bg-slate-800 shadow-sm">
 
-            <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <div className="flex min-h-16 w-full flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
 
                 <Link to="/" className="flex items-center gap-3">
 
