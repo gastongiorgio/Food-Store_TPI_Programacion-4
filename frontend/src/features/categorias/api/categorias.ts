@@ -16,9 +16,7 @@ export async function getCategories(): Promise<Categoria[]> {
 export async function getCategory(
     categoriaId: number
 ): Promise<Categoria> {
-    const response = await axiosInstance.get<Categoria>(
-        `/categorias/${categoriaId}`
-    )
+    const response = await axiosInstance.get<Categoria>(`/categorias/${categoriaId}`)
 
     return response.data
 }
@@ -26,10 +24,7 @@ export async function getCategory(
 export async function createCategory(
     datos: CategoriaCreate
 ): Promise<Categoria> {
-    const response = await axiosInstance.post<Categoria>(
-        "/categorias",
-        datos
-    )
+    const response = await axiosInstance.post<Categoria>("/categorias", datos)
 
     return response.data
 }
@@ -38,10 +33,7 @@ export async function updateCategory(
     categoriaId: number,
     datos: CategoriaUpdate
 ): Promise<Categoria> {
-    const response = await axiosInstance.put<Categoria>(
-        `/categorias/${categoriaId}`,
-        datos
-    )
+    const response = await axiosInstance.put<Categoria>(`/categorias/${categoriaId}`, datos)
 
     return response.data
 }
@@ -49,7 +41,5 @@ export async function updateCategory(
 export async function deleteCategory(
     categoriaId: number
 ): Promise<void> {
-    await axiosInstance.delete(
-        `/categorias/${categoriaId}`
-    )
+    await axiosInstance.delete(`/categorias/${categoriaId}`)
 }
