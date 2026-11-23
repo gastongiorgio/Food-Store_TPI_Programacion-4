@@ -1,5 +1,6 @@
 import { useState } from "react"
 
+import { useCartStore } from "../../../store/cartStore"
 import type { Producto } from "../types/productos"
 
 
@@ -15,43 +16,33 @@ const priceFormatter = new Intl.NumberFormat("es-AR", {
 })
 
 
-const photoCredits = {
-    muzzarella: {
-        source: "https://commons.wikimedia.org/wiki/File:Pizza_de_muzzarella_al_estilo_argentino_servida_sobre_tabla_de_madera.jpg",
-        license: "https://creativecommons.org/licenses/by-sa/3.0/",
-        label: "CC BY-SA 3.0"
-    },
-    especial: {
-        source: "https://commons.wikimedia.org/wiki/File:Pizza_mozzarella_con_huevos,_tomates,_jam%C3%B3n,_morr%C3%B3n_verde,_cebollas_y_especias.jpg",
-        license: "https://creativecommons.org/licenses/by/4.0/",
-        label: "CC BY 4.0"
-    }
-}
-
-
 function ProductoCard({ producto }: ProductoCardProps) {
     const [failedImage, setFailedImage] = useState<string | null>(null)
 
-    const disponible = producto.disponible && producto.stock > 0
+    const agregar = useCartStore((state) => state.agregar)
+
+    const cantidadEnCarrito = useCartStore(
+        (state) =>
+            state.items.find(
+                (item) => item.producto_id === producto.id
+            )?.cantidad ?? 0
+    )
+
+    const disponible =
+        producto.activo &&
+        producto.disponible &&
+        producto.stock > 0
+
+    const puedeAgregar =
+        disponible &&
+        cantidadEnCarrito < producto.stock
 
     const imageUrl = producto.imagen_url?.trim()
     const showImage = Boolean(imageUrl && failedImage !== imageUrl)
 
-    const isCommonsImage = imageUrl?.includes("commons.wikimedia.org")
-
-    const credit = imageUrl?.includes(
-        "Pizza_de_muzzarella_al_estilo_argentino"
-    )
-        ? photoCredits.muzzarella
-        : imageUrl?.includes("Pizza_mozzarella_con_huevos")
-            ? photoCredits.especial
-            : null
-
 
     return (
         <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
-
-            {/* IMAGEN DEL PRODUCTO */}
 
             <div className="aspect-square w-full shrink-0 overflow-hidden bg-[#F0EAE2]">
 
@@ -64,11 +55,7 @@ function ProductoCard({ producto }: ProductoCardProps) {
                         onError={() => {
                             setFailedImage(imageUrl ?? null)
                         }}
-                        className={
-                            isCommonsImage
-                                ? "block h-full w-full object-contain"
-                                : "block h-full w-full object-cover"
-                        }
+                        className="block h-full w-full object-cover"
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">
@@ -80,13 +67,8 @@ function ProductoCard({ producto }: ProductoCardProps) {
 
             </div>
 
-
-            {/* INFORMACIÓN DEL PRODUCTO */}
-
             <div className="flex min-h-64 flex-1 flex-col gap-3 p-5">
-
                 <div className="flex flex-wrap items-center justify-between gap-2">
-
                     <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">
                         {producto.categoria.nombre}
                     </span>
@@ -103,16 +85,13 @@ function ProductoCard({ producto }: ProductoCardProps) {
 
                 </div>
 
-
                 <h2 className="text-lg font-semibold text-slate-800">
                     {producto.nombre}
                 </h2>
 
-
                 <p className="line-clamp-2 flex-1 text-sm text-slate-500">
                     {producto.descripcion || "Sin descripción"}
                 </p>
-
 
                 <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
 
@@ -126,29 +105,22 @@ function ProductoCard({ producto }: ProductoCardProps) {
 
                 </div>
 
+                <button
+                    type="button"
+                    disabled={!puedeAgregar}
+                    onClick={() => agregar(producto)}
+                    className="w-full rounded-lg bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                >
+                    {!disponible
+                        ? "No disponible"
+                        : cantidadEnCarrito >= producto.stock
+                            ? "Stock máximo alcanzado"
+                            : "Agregar al carrito"}
+                </button>
 
-                {/* CRÉDITOS DE FOTOGRAFÍAS CON LICENCIA CC */}
-
-                {credit && showImage && (
-                    <p className="text-[11px] leading-relaxed text-slate-400">
-                        Foto:{" "}
-                        <a
-                            href={credit.source}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline hover:text-teal-700"
-                        >
-                            Horacio Cambeiro
-                        </a>
-                        {" · "}
-                        <a
-                            href={credit.license}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline hover:text-teal-700"
-                        >
-                            {credit.label}
-                        </a>
+                {cantidadEnCarrito > 0 && (
+                    <p className="text-center text-xs font-medium text-teal-700">
+                        En el carrito: {cantidadEnCarrito}
                     </p>
                 )}
 

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
 import { useAuthStore } from "../../store/authStore"
+import { useCartStore } from "../../store/cartStore"
 import { handleApiError } from "../api/handleApiError"
 
 
@@ -11,6 +12,13 @@ function Navbar() {
     const usuario = useAuthStore((state) => state.usuario)
     const cargando = useAuthStore((state) => state.cargando)
     const logout = useAuthStore((state) => state.logout)
+
+    const cantidadCarrito = useCartStore(
+        (state) => state.items.reduce(
+            (total, item) => total + item.cantidad,
+            0
+        )
+    )
 
     const [error, setError] = useState<string | null>(null)
 
@@ -64,10 +72,47 @@ function Navbar() {
 
                     <Link
                         to="/"
-                        className="text-sm font-medium text-slate-200 transition hover:text-cyan-300"
+                        className="hidden text-sm font-medium text-slate-200 transition hover:text-cyan-300 sm:block"
                     >
                         Catálogo
                     </Link>
+
+
+                    {/* CARRITO */}
+
+                    <Link
+                        to="/carrito"
+                        aria-label={`Carrito, ${cantidadCarrito} unidades`}
+                        className="flex items-center gap-2 rounded-lg border border-slate-600 px-3 py-2 text-sm font-medium text-white transition hover:border-cyan-300 hover:text-cyan-200"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="21"
+                            height="21"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="9" cy="21" r="1" />
+                            <circle cx="20" cy="21" r="1" />
+                            <path d="M1 1h4l2.5 13h12l2-9H6" />
+                        </svg>
+
+                        <span className="hidden sm:inline">
+                            Carrito
+                        </span>
+
+                        <span className="flex min-w-6 items-center justify-center rounded-full bg-teal-600 px-1.5 py-0.5 text-xs font-bold text-white">
+                            {cantidadCarrito}
+                        </span>
+                    </Link>
+
+
+                    {/* SESIÓN */}
 
                     {cargando ? (
                         <span className="text-sm text-slate-300">
@@ -109,6 +154,7 @@ function Navbar() {
                 </nav>
 
             </div>
+
 
             {error && (
                 <p
