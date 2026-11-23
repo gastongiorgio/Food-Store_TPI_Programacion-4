@@ -14,6 +14,8 @@ import MisPedidosPage from "../features/pedidos/pages/MisPedidosPage"
 import AdminResumenPage from "../features/pedidos/pages/AdminResumenPage"
 import AdminPedidosPage from "../features/pedidos/pages/AdminPedidosPage"
 
+import AdminUsuariosPage from "../features/usuarios/pages/AdminUsuariosPage"
+
 import MainLayout from "../shared/layout/MainLayout"
 import AdminLayout from "../shared/layout/AdminLayout"
 import ProtectedRoute from "./ProtectedRoute"
@@ -103,6 +105,11 @@ function AppRouter() {
                     <Route
                         path="pedidos"
                         element={<AdminPedidosPage />}
+                    />
+
+                    <Route
+                        path="usuarios"
+                        element={<AdminUsuariosPage />}
                     />
 
                 </Route>

@@ -1,11 +1,6 @@
 import { Link, NavLink } from "react-router-dom"
 
 
-const seccionesPendientes = [
-    "Usuarios"
-]
-
-
 function SidebarContent() {
     return (
         <div className="flex flex-col gap-5">
@@ -156,24 +151,41 @@ function SidebarContent() {
                     </span>
                 </NavLink>
 
-                <p className="px-4 pt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Próximamente
-                </p>
+                <NavLink
+                    to="/admin/usuarios"
+                    end
+                    className={({ isActive }) =>
+                        `rounded-xl px-4 py-3 text-sm font-medium transition ${
+                            isActive
+                                ? "bg-teal-600 text-white shadow-sm"
+                                : "text-slate-600 hover:bg-slate-100 hover:text-teal-700"
+                        }`
+                    }
+                >
+                    <span className="flex items-center gap-3">
 
-                {seccionesPendientes.map((seccion) => (
-                    <div
-                        key={seccion}
-                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-400"
-                        aria-disabled="true"
-                    >
-                        <span
-                            className="h-2 w-2 rounded-full bg-slate-300"
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="19"
+                            height="19"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                             aria-hidden="true"
-                        />
+                        >
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
 
-                        {seccion}
-                    </div>
-                ))}
+                        Usuarios
+
+                    </span>
+                </NavLink>
 
             </nav>
 
@@ -205,7 +217,6 @@ function SidebarContent() {
                 </Link>
 
             </div>
-
         </div>
     )
 }
