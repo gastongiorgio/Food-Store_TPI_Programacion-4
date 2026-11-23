@@ -36,7 +36,7 @@ function Navbar() {
     return (
         <header className="border-b border-slate-700 bg-slate-800 shadow-sm">
 
-            <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
 
                 <Link to="/" className="flex items-center gap-3">
 
@@ -65,7 +65,7 @@ function Navbar() {
 
                 </Link>
 
-                <nav className="flex items-center gap-3 sm:gap-5">
+                <nav className="flex flex-wrap items-center gap-3 sm:gap-5">
 
                     <Link
                         to="/"
@@ -114,13 +114,23 @@ function Navbar() {
                         </Link>
                     )}
 
+                    {!cargando && usuario?.role === "admin" && (
+                        <Link
+                            to="/admin/resumen"
+                            className="rounded-lg border border-teal-500 px-3 py-2 text-xs font-semibold text-teal-100 transition hover:bg-slate-700 sm:text-sm"
+                        >
+                            <span className="sm:hidden">Admin</span>
+                            <span className="hidden sm:inline">Panel admin</span>
+                        </Link>
+                    )}
+
                     {cargando ? (
                         <span className="text-sm text-slate-300">
                             Cargando...
                         </span>
                     ) : usuario ? (
                         <>
-                            <div className="hidden text-right sm:block">
+                            <div className="hidden text-right lg:block">
 
                                 <p className="text-sm font-medium text-white">
                                     {usuario.full_name}
