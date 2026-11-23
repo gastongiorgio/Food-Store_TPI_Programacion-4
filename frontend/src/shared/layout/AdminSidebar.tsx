@@ -2,7 +2,6 @@ import { Link, NavLink } from "react-router-dom"
 
 
 const seccionesPendientes = [
-    "Productos",
     "Pedidos",
     "Usuarios"
 ]
@@ -87,6 +86,41 @@ function SidebarContent() {
                     </span>
                 </NavLink>
 
+                <NavLink
+                    to="/admin/productos"
+                    end
+                    className={({ isActive }) =>
+                        `rounded-xl px-4 py-3 text-sm font-medium transition ${
+                            isActive
+                                ? "bg-teal-600 text-white shadow-sm"
+                                : "text-slate-600 hover:bg-slate-100 hover:text-teal-700"
+                        }`
+                    }
+                >
+                    <span className="flex items-center gap-3">
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="19"
+                            height="19"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+                            <path d="M3 8v9l9 5 9-5V8" />
+                            <path d="M12 13v9" />
+                        </svg>
+
+                        Productos
+
+                    </span>
+                </NavLink>
+
                 <p className="px-4 pt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
                     Próximamente
                 </p>
@@ -136,6 +170,7 @@ function SidebarContent() {
                 </Link>
 
             </div>
+
         </div>
     )
 }

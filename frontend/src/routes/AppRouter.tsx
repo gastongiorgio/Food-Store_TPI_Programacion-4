@@ -5,6 +5,7 @@ import RegisterPage from "../features/auth/pages/RegisterPage"
 import UnauthorizedPage from "../features/auth/pages/UnauthorizedPage"
 
 import CatalogoPage from "../features/productos/pages/CatalogoPage"
+import AdminProductosPage from "../features/productos/pages/AdminProductosPage"
 import AdminCategoriasPage from "../features/categorias/pages/AdminCategoriasPage"
 
 import CarritoPage from "../features/pedidos/pages/CarritoPage"
@@ -91,6 +92,11 @@ function AppRouter() {
                     <Route
                         path="categorias"
                         element={<AdminCategoriasPage />}
+                    />
+
+                    <Route
+                        path="productos"
+                        element={<AdminProductosPage />}
                     />
 
                 </Route>
