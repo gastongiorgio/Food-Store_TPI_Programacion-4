@@ -12,6 +12,7 @@ import CarritoPage from "../features/pedidos/pages/CarritoPage"
 import CheckoutPage from "../features/pedidos/pages/CheckoutPage"
 import MisPedidosPage from "../features/pedidos/pages/MisPedidosPage"
 import AdminResumenPage from "../features/pedidos/pages/AdminResumenPage"
+import AdminPedidosPage from "../features/pedidos/pages/AdminPedidosPage"
 
 import MainLayout from "../shared/layout/MainLayout"
 import AdminLayout from "../shared/layout/AdminLayout"
@@ -97,6 +98,11 @@ function AppRouter() {
                     <Route
                         path="productos"
                         element={<AdminProductosPage />}
+                    />
+
+                    <Route
+                        path="pedidos"
+                        element={<AdminPedidosPage />}
                     />
 
                 </Route>

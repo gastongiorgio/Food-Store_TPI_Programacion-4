@@ -2,7 +2,12 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 import { getPedidos } from "../api/pedidos"
-import type { EstadoPedido } from "../types/pedidos"
+import { useCambiarEstadoPedido } from "../hooks/useCambiarEstadoPedido"
+
+import type {
+    Pedido,
+    EstadoPedido
+} from "../types/pedidos"
 
 import { handleApiError } from "../../../shared/api/handleApiError"
 
@@ -32,10 +37,19 @@ const estilosEstado: Record<EstadoPedido, string> = {
 }
 
 
+type CambioPendiente = {
+    pedido: Pedido
+    nuevoEstado: EstadoPedido
+} | null
+
+
 function AdminPedidosPage() {
     const [page, setPage] = useState(0)
     const [estado, setEstado] = useState<EstadoPedido | "">("")
     const [detalleAbierto, setDetalleAbierto] = useState<number | null>(null)
+    const [cambioPendiente, setCambioPendiente] = useState<CambioPendiente>(null)
+    const [mensajeExito, setMensajeExito] = useState<string | null>(null)
+    const [errorCambio, setErrorCambio] = useState<string | null>(null)
 
     const {
         data,
@@ -53,6 +67,8 @@ function AdminPedidosPage() {
         )
     })
 
+    const cambiarEstado = useCambiarEstadoPedido()
+
     const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE)
 
 
@@ -60,12 +76,58 @@ function AdminPedidosPage() {
         setEstado(nuevoEstado)
         setPage(0)
         setDetalleAbierto(null)
+        setCambioPendiente(null)
+        setErrorCambio(null)
+        setMensajeExito(null)
     }
 
 
     function cambiarPagina(nuevaPagina: number) {
         setPage(nuevaPagina)
         setDetalleAbierto(null)
+        setCambioPendiente(null)
+        setErrorCambio(null)
+        setMensajeExito(null)
+    }
+
+
+    function solicitarCambio(
+        pedido: Pedido,
+        nuevoEstado: EstadoPedido
+    ) {
+        setCambioPendiente({
+            pedido,
+            nuevoEstado
+        })
+
+        setErrorCambio(null)
+        setMensajeExito(null)
+    }
+
+
+    async function confirmarCambio() {
+        if (!cambioPendiente) {
+            return
+        }
+
+        setErrorCambio(null)
+
+        try {
+            await cambiarEstado.mutateAsync({
+                pedidoId: cambioPendiente.pedido.id,
+                estado: cambioPendiente.nuevoEstado
+            })
+
+            setMensajeExito(
+                `El pedido #${cambioPendiente.pedido.id} pasó a ${estados[cambioPendiente.nuevoEstado]}.`
+            )
+
+            setCambioPendiente(null)
+            setDetalleAbierto(null)
+            setPage(0)
+        } catch (error) {
+            setErrorCambio(handleApiError(error))
+        }
     }
 
 
@@ -81,7 +143,7 @@ function AdminPedidosPage() {
                     </h1>
 
                     <p className="mt-2 text-slate-500">
-                        Consultá los pedidos, sus estados y detalles.
+                        Consultá los pedidos y administrá sus estados.
                     </p>
 
                 </div>
@@ -109,10 +171,11 @@ function AdminPedidosPage() {
                 <select
                     id="filtro-estado"
                     value={estado}
+                    disabled={cambiarEstado.isPending}
                     onChange={(event) => cambiarFiltro(
                         event.target.value as EstadoPedido | ""
                     )}
-                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100 sm:max-w-xs"
+                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100 disabled:opacity-50 sm:max-w-xs"
                 >
                     <option value="">Todos los estados</option>
                     <option value="PENDIENTE">Pendientes</option>
@@ -122,6 +185,88 @@ function AdminPedidosPage() {
                 </select>
 
             </div>
+
+
+            {mensajeExito && (
+                <div
+                    role="status"
+                    className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-700"
+                >
+                    {mensajeExito}
+                </div>
+            )}
+
+            {cambioPendiente && (
+                <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
+
+                    <h2 className="text-lg font-bold text-slate-800">
+                        Confirmar cambio de estado
+                    </h2>
+
+                    <p className="mt-3 text-sm text-slate-700">
+                        ¿Querés cambiar el pedido{" "}
+                        <strong>#{cambioPendiente.pedido.id}</strong>{" "}
+                        de{" "}
+                        <strong>
+                            {estados[cambioPendiente.pedido.estado]}
+                        </strong>{" "}
+                        a{" "}
+                        <strong>
+                            {estados[cambioPendiente.nuevoEstado]}
+                        </strong>?
+                    </p>
+
+                    {cambioPendiente.nuevoEstado === "CANCELADO" && (
+                        <p className="mt-3 text-sm text-slate-600">
+                            Al cancelar el pedido, el backend repondrá
+                            el stock de los productos correspondientes.
+                        </p>
+                    )}
+
+
+                    {errorCambio && (
+                        <p
+                            role="alert"
+                            className="mt-4 rounded-lg border border-red-200 bg-white px-4 py-3 text-sm text-red-700"
+                        >
+                            {errorCambio}
+                        </p>
+                    )}
+
+
+                    <div className="mt-5 flex flex-wrap justify-end gap-3">
+
+                        <button
+                            type="button"
+                            disabled={cambiarEstado.isPending}
+                            onClick={() => {
+                                setCambioPendiente(null)
+                                setErrorCambio(null)
+                            }}
+                            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        >
+                            Volver
+                        </button>
+
+                        <button
+                            type="button"
+                            disabled={cambiarEstado.isPending}
+                            onClick={() => void confirmarCambio()}
+                            className={
+                                cambioPendiente.nuevoEstado === "CANCELADO"
+                                    ? "rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    : "rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-50"
+                            }
+                        >
+                            {cambiarEstado.isPending
+                                ? "Procesando..."
+                                : "Confirmar cambio"}
+                        </button>
+
+                    </div>
+
+                </div>
+            )}
 
             {isPending ? (
 
@@ -216,11 +361,12 @@ function AdminPedidosPage() {
 
                     <div className="overflow-x-auto">
 
-                        <table className="w-full min-w-180 text-left text-sm">
+                        <table className="w-full min-w-230 text-left text-sm">
 
                             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
 
                                 <tr>
+
                                     <th scope="col" className="px-5 py-4 font-semibold">
                                         Pedido
                                     </th>
@@ -244,6 +390,7 @@ function AdminPedidosPage() {
                                     <th scope="col" className="px-5 py-4 font-semibold">
                                         Acciones
                                     </th>
+
                                 </tr>
 
                             </thead>
@@ -282,20 +429,70 @@ function AdminPedidosPage() {
 
                                         <td className="px-5 py-4">
 
-                                            <button
-                                                type="button"
-                                                aria-expanded={detalleAbierto === pedido.id}
-                                                onClick={() => setDetalleAbierto(
-                                                    detalleAbierto === pedido.id
-                                                        ? null
-                                                        : pedido.id
+                                            <div className="flex flex-wrap items-center gap-2">
+
+                                                <button
+                                                    type="button"
+                                                    aria-expanded={detalleAbierto === pedido.id}
+                                                    onClick={() => setDetalleAbierto(
+                                                        detalleAbierto === pedido.id
+                                                            ? null
+                                                            : pedido.id
+                                                    )}
+                                                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                                >
+                                                    {detalleAbierto === pedido.id
+                                                        ? "Ocultar detalle"
+                                                        : "Ver detalle"}
+                                                </button>
+
+
+                                                {pedido.estado === "PENDIENTE" && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={cambiarEstado.isPending}
+                                                        onClick={() => solicitarCambio(
+                                                            pedido,
+                                                            "EN_PREPARACION"
+                                                        )}
+                                                        className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-50"
+                                                    >
+                                                        Iniciar preparación
+                                                    </button>
                                                 )}
-                                                className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700 transition hover:bg-teal-100"
-                                            >
-                                                {detalleAbierto === pedido.id
-                                                    ? "Ocultar detalle"
-                                                    : "Ver detalle"}
-                                            </button>
+
+
+                                                {pedido.estado === "EN_PREPARACION" && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={cambiarEstado.isPending}
+                                                        onClick={() => solicitarCambio(
+                                                            pedido,
+                                                            "ENTREGADO"
+                                                        )}
+                                                        className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700 transition hover:bg-teal-100 disabled:opacity-50"
+                                                    >
+                                                        Entregar
+                                                    </button>
+                                                )}
+
+
+                                                {(pedido.estado === "PENDIENTE" ||
+                                                    pedido.estado === "EN_PREPARACION") && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={cambiarEstado.isPending}
+                                                        onClick={() => solicitarCambio(
+                                                            pedido,
+                                                            "CANCELADO"
+                                                        )}
+                                                        className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                )}
+
+                                            </div>
 
                                         </td>
 
@@ -357,7 +554,6 @@ function AdminPedidosPage() {
                                         )}
 
                                     </div>
-
 
                                     <div className="space-y-3">
 
@@ -423,7 +619,7 @@ function AdminPedidosPage() {
 
                                 <button
                                     type="button"
-                                    disabled={page === 0}
+                                    disabled={page === 0 || cambiarEstado.isPending}
                                     onClick={() => cambiarPagina(page - 1)}
                                     className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
@@ -432,7 +628,10 @@ function AdminPedidosPage() {
 
                                 <button
                                     type="button"
-                                    disabled={page + 1 >= totalPages}
+                                    disabled={
+                                        page + 1 >= totalPages ||
+                                        cambiarEstado.isPending
+                                    }
                                     onClick={() => cambiarPagina(page + 1)}
                                     className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
