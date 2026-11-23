@@ -11,7 +11,6 @@ const priceFormatter = new Intl.NumberFormat("es-AR", {
     maximumFractionDigits: 0
 })
 
-
 function CarritoPage() {
     const items = useCartStore((state) => state.items)
     const quitar = useCartStore((state) => state.quitar)
@@ -33,11 +32,24 @@ function CarritoPage() {
         }))
     })
 
+    const puedeConfirmar =
+        items.length > 0 &&
+        consultasProductos.every((consulta, index) => {
+            const producto = consulta.data
+
+            return Boolean(
+                producto &&
+                producto.activo &&
+                producto.disponible &&
+                producto.stock >= items[index].cantidad
+            )
+        })
 
     return (
         <section className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
 
             <div className="mb-8">
+
                 <h1 className="text-3xl font-bold text-slate-800">
                     Mi carrito
                 </h1>
@@ -45,8 +57,8 @@ function CarritoPage() {
                 <p className="mt-2 text-slate-500">
                     Revisá los productos y las cantidades de tu pedido.
                 </p>
-            </div>
 
+            </div>
 
             {items.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
@@ -65,16 +77,15 @@ function CarritoPage() {
 
                     <Link
                         to="/"
-                        className="mt-6 inline-block rounded-lg bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-500"
+                        className="mt-6 inline-block rounded-lg bg-teal-600 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-500"
                     >
                         Ver catálogo
                     </Link>
 
                 </div>
-
             ) : (
-
                 <div className="grid items-start gap-6 lg:grid-cols-3">
+
                     <div className="space-y-4 lg:col-span-2">
 
                         {items.map((item, index) => {
@@ -92,7 +103,8 @@ function CarritoPage() {
                                 item.cantidad > productoActual.stock
                             )
 
-                            const subtotal = item.precio_unitario * item.cantidad
+                            const subtotal =
+                                item.precio_unitario * item.cantidad
 
                             return (
                                 <article
@@ -103,6 +115,7 @@ function CarritoPage() {
                                     <div className="flex flex-wrap items-start justify-between gap-4">
 
                                         <div>
+
                                             <h2 className="text-lg font-semibold text-slate-800">
                                                 {item.nombre}
                                             </h2>
@@ -111,12 +124,13 @@ function CarritoPage() {
                                                 Precio unitario:{" "}
                                                 {priceFormatter.format(item.precio_unitario)}
                                             </p>
+
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={() => quitar(item.producto_id)}
-                                            className="text-sm font-medium text-red-600 transition hover:text-red-700 hover:underline"
+                                            className="text-sm font-medium text-red-600 hover:underline"
                                         >
                                             Quitar
                                         </button>
@@ -136,7 +150,7 @@ function CarritoPage() {
                                                         item.cantidad - 1
                                                     )
                                                 }
-                                                className="px-4 py-2 text-lg font-medium text-slate-700 transition hover:bg-slate-100"
+                                                className="px-4 py-2 text-lg font-medium text-slate-700 hover:bg-slate-100"
                                             >
                                                 −
                                             </button>
@@ -155,7 +169,7 @@ function CarritoPage() {
                                                         item.cantidad + 1
                                                     )
                                                 }
-                                                className="px-4 py-2 text-lg font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+                                                className="px-4 py-2 text-lg font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
                                             >
                                                 +
                                             </button>
@@ -163,6 +177,7 @@ function CarritoPage() {
                                         </div>
 
                                         <div className="text-right">
+
                                             <p className="text-xs text-slate-500">
                                                 Subtotal
                                             </p>
@@ -170,10 +185,10 @@ function CarritoPage() {
                                             <p className="text-lg font-bold text-slate-800">
                                                 {priceFormatter.format(subtotal)}
                                             </p>
+
                                         </div>
 
                                     </div>
-
 
                                     {consulta?.isPending && (
                                         <p className="mt-3 text-xs text-slate-500">
@@ -207,7 +222,7 @@ function CarritoPage() {
 
                             <Link
                                 to="/"
-                                className="text-sm font-medium text-teal-700 transition hover:underline"
+                                className="text-sm font-medium text-teal-700 hover:underline"
                             >
                                 ← Seguir comprando
                             </Link>
@@ -215,7 +230,7 @@ function CarritoPage() {
                             <button
                                 type="button"
                                 onClick={vaciar}
-                                className="text-sm font-medium text-red-600 transition hover:underline"
+                                className="text-sm font-medium text-red-600 hover:underline"
                             >
                                 Vaciar carrito
                             </button>
@@ -245,30 +260,46 @@ function CarritoPage() {
                             <div className="border-t border-slate-200 pt-4">
 
                                 <div className="flex items-center justify-between gap-3">
+
                                     <span className="font-semibold text-slate-800">
-                                        Total
+                                        Total estimado
                                     </span>
 
                                     <span className="text-2xl font-bold text-teal-700">
                                         {priceFormatter.format(total)}
                                     </span>
+
                                 </div>
 
                             </div>
 
                         </div>
 
-                        <p className="mt-6 text-xs leading-relaxed text-slate-500">
-                            Los precios y el stock se validarán nuevamente al confirmar el pedido.
+                        <p className="mt-5 text-xs leading-relaxed text-slate-500">
+                            Los precios y el stock se validarán nuevamente
+                            al confirmar el pedido.
                         </p>
 
-                        <p className="mt-3 text-xs text-slate-500">
-                            La confirmación del pedido se incorporará en la próxima etapa.
-                        </p>
+                        {puedeConfirmar ? (
+                            <Link
+                                to="/checkout"
+                                className="mt-6 block rounded-lg bg-teal-600 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-teal-500"
+                            >
+                                Continuar al checkout
+                            </Link>
+                        ) : (
+                            <p className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                Revisá la disponibilidad y las cantidades
+                                antes de continuar.
+                            </p>
+                        )}
 
                     </aside>
+
                 </div>
+
             )}
+
         </section>
     )
 }

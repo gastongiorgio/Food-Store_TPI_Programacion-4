@@ -22,7 +22,6 @@ function Navbar() {
 
     const [error, setError] = useState<string | null>(null)
 
-
     const handleLogout = async () => {
         setError(null)
 
@@ -33,7 +32,6 @@ function Navbar() {
             setError(handleApiError(error))
         }
     }
-
 
     return (
         <header className="border-b border-slate-700 bg-slate-800 shadow-sm">
@@ -67,7 +65,6 @@ function Navbar() {
 
                 </Link>
 
-
                 <nav className="flex items-center gap-3 sm:gap-5">
 
                     <Link
@@ -76,9 +73,6 @@ function Navbar() {
                     >
                         Catálogo
                     </Link>
-
-
-                    {/* CARRITO */}
 
                     <Link
                         to="/carrito"
@@ -111,8 +105,14 @@ function Navbar() {
                         </span>
                     </Link>
 
-
-                    {/* SESIÓN */}
+                    {!cargando && usuario && (
+                        <Link
+                            to="/mis-pedidos"
+                            className="hidden text-sm font-medium text-slate-200 transition hover:text-cyan-300 md:inline"
+                        >
+                            Mis pedidos
+                        </Link>
+                    )}
 
                     {cargando ? (
                         <span className="text-sm text-slate-300">
@@ -154,7 +154,6 @@ function Navbar() {
                 </nav>
 
             </div>
-
 
             {error && (
                 <p

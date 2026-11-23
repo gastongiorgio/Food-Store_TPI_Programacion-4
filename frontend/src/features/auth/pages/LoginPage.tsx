@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import { useAuthStore } from "../../../store/authStore"
 import { handleApiError } from "../../../shared/api/handleApiError"
@@ -8,10 +8,20 @@ import { handleApiError } from "../../../shared/api/handleApiError"
 
 function LoginPage() {
     const navigate = useNavigate()
+    const location = useLocation()
 
     const login = useAuthStore((state) => state.login)
 
     const [error, setError] = useState<string | null>(null)
+
+    const rutaAnterior = (location.state as { from?: string } | null)?.from
+
+    const destino =
+        typeof rutaAnterior === "string" &&
+        rutaAnterior.startsWith("/") &&
+        !rutaAnterior.startsWith("//")
+            ? rutaAnterior
+            : "/"
 
 
     // TANSTACK FORM: FORMULARIO DE LOGIN
@@ -26,13 +36,12 @@ function LoginPage() {
 
             try {
                 await login(value)
-                navigate("/")
+                navigate(destino, { replace: true })
             } catch (error) {
                 setError(handleApiError(error))
             }
         }
     })
-
 
     return (
         <section className="flex flex-1 items-center justify-center px-4 py-10">
@@ -50,7 +59,6 @@ function LoginPage() {
                     </p>
 
                 </div>
-
 
                 <form
                     className="space-y-5"
@@ -110,7 +118,6 @@ function LoginPage() {
                         )}
                     </form.Field>
 
-
                     <form.Field
                         name="password"
                         validators={{
@@ -160,7 +167,6 @@ function LoginPage() {
                         )}
                     </form.Field>
 
-
                     {error && (
                         <p
                             role="alert"
@@ -169,7 +175,6 @@ function LoginPage() {
                             {error}
                         </p>
                     )}
-
 
                     <form.Subscribe
                         selector={(state) => [
@@ -191,7 +196,6 @@ function LoginPage() {
                     </form.Subscribe>
 
                 </form>
-
 
                 <p className="mt-6 text-center text-sm text-slate-500">
                     ¿No tenés una cuenta?{" "}
