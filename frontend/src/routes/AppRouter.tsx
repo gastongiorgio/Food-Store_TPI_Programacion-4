@@ -5,6 +5,7 @@ import RegisterPage from "../features/auth/pages/RegisterPage"
 import UnauthorizedPage from "../features/auth/pages/UnauthorizedPage"
 
 import CatalogoPage from "../features/productos/pages/CatalogoPage"
+import AdminCategoriasPage from "../features/categorias/pages/AdminCategoriasPage"
 
 import CarritoPage from "../features/pedidos/pages/CarritoPage"
 import CheckoutPage from "../features/pedidos/pages/CheckoutPage"
@@ -20,10 +21,8 @@ function AppRouter() {
     return (
         <Routes>
 
-            {/* VISTA DE LA TIENDA */}
             <Route element={<MainLayout />}>
 
-                {/* RUTAS PÚBLICAS */}
                 <Route
                     path="/login"
                     element={<LoginPage />}
@@ -49,8 +48,6 @@ function AppRouter() {
                     element={<UnauthorizedPage />}
                 />
 
-
-                {/* RUTAS CON SESIÓN */}
                 <Route element={<ProtectedRoute />}>
 
                     <Route
@@ -67,7 +64,6 @@ function AppRouter() {
 
             </Route>
 
-            {/* VISTA ADMINISTRATIVA */}
             <Route
                 element={<ProtectedRoute roles={["admin"]} />}
             >
@@ -90,6 +86,11 @@ function AppRouter() {
                     <Route
                         path="resumen"
                         element={<AdminResumenPage />}
+                    />
+
+                    <Route
+                        path="categorias"
+                        element={<AdminCategoriasPage />}
                     />
 
                 </Route>

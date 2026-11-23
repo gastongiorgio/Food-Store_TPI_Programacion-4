@@ -2,7 +2,6 @@ import { Link, NavLink } from "react-router-dom"
 
 
 const seccionesPendientes = [
-    "Categorías",
     "Productos",
     "Pedidos",
     "Usuarios"
@@ -30,6 +29,7 @@ function SidebarContent() {
                     }
                 >
                     <span className="flex items-center gap-3">
+
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="19"
@@ -49,6 +49,41 @@ function SidebarContent() {
                         </svg>
 
                         Resumen
+
+                    </span>
+                </NavLink>
+
+                <NavLink
+                    to="/admin/categorias"
+                    end
+                    className={({ isActive }) =>
+                        `rounded-xl px-4 py-3 text-sm font-medium transition ${
+                            isActive
+                                ? "bg-teal-600 text-white shadow-sm"
+                                : "text-slate-600 hover:bg-slate-100 hover:text-teal-700"
+                        }`
+                    }
+                >
+                    <span className="flex items-center gap-3">
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="19"
+                            height="19"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M20.59 13.41 11 3.83H4v7l9.59 9.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.83Z" />
+                            <circle cx="7.5" cy="7.5" r="1" />
+                        </svg>
+
+                        Categorías
+
                     </span>
                 </NavLink>
 
@@ -79,6 +114,7 @@ function SidebarContent() {
                     to="/"
                     className="flex items-center gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-700 transition hover:bg-teal-100"
                 >
+
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="18"
@@ -96,10 +132,10 @@ function SidebarContent() {
                     </svg>
 
                     Volver al catálogo
+
                 </Link>
 
             </div>
-
         </div>
     )
 }
