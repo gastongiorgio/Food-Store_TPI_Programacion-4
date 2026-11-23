@@ -314,4 +314,4 @@ Los ejemplos completos se encuentran en `backend/.env.example` y `frontend/.env.
 
 ## Video de demostración
 
-Pendiente de grabación y publicación. Se incorporará aquí el enlace público al video de demostración del Trabajo Práctico Integrador.
+[Ver demostración de Food Store en YouTube](https://youtu.be/t80026K642g)
