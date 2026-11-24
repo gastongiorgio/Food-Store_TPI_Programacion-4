@@ -312,6 +312,12 @@ http://localhost:8000/docs
 
 Los ejemplos completos se encuentran en `backend/.env.example` y `frontend/.env.example`.
 
+## Repositorio de GitHub
+
+El código fuente completo del proyecto se encuentra disponible en el siguiente repositorio público:
+
+[Food Store - TPI Programación IV](https://github.com/gastongiorgio/Food-Store_TPI_Programacion-4)
+
 ## Video de demostración
 
 [Ver demostración de Food Store en YouTube](https://youtu.be/t80026K642g)
